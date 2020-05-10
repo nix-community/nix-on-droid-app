@@ -52,7 +52,7 @@ import java.util.zip.ZipInputStream;
  */
 final class TermuxInstaller {
 
-    static String defaultBootstrapURL = "https://nix-on-droid.unboiled.info/bootstrap";
+    static String defaultBootstrapURL = "https://nix-on-droid.unboiled.info/bootstrap-release-20.03";
 
     /** Performs setup if necessary. */
     static void setupIfNeeded(final Activity activity, final Runnable whenDone) {
