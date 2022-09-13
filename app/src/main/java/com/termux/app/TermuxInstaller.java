@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Environment;
 import android.system.Os;
 import android.util.Pair;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import com.termux.R;
 import com.termux.shared.file.FileUtils;
@@ -24,11 +26,13 @@ import com.termux.shared.termux.TermuxUtils;
 import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -48,7 +52,7 @@ import static com.termux.shared.termux.TermuxConstants.TERMUX_STAGING_PREFIX_DIR
  * <p/>
  * (3) A staging directory, $STAGING_PREFIX, is cleared if left over from broken installation below.
  * <p/>
- * (4) The zip file is loaded from a shared library.
+ * (4) The architecture is determined and an appropriate bootstrap zip url is determined in {@link #determineZipUrl()}.
  * <p/>
  * (5) The zip, containing entries relative to the $PREFIX, is is downloaded and extracted by a zip input stream
  * continuously encountering zip file entries:
@@ -60,6 +64,7 @@ import static com.termux.shared.termux.TermuxConstants.TERMUX_STAGING_PREFIX_DIR
 final class TermuxInstaller {
 
     private static final String LOG_TAG = "TermuxInstaller";
+    static String defaultBootstrapURL = "https://nix-on-droid.unboiled.info/bootstrap";
 
     /** Performs bootstrap setup if necessary. */
     static void setupBootstrapIfNeeded(final Activity activity, final Runnable whenDone) {
@@ -114,6 +119,29 @@ final class TermuxInstaller {
             Logger.logInfo(LOG_TAG, "The termux prefix directory \"" + TERMUX_PREFIX_DIR_PATH + "\" does not exist but another file exists at its destination.");
         }
 
+        final EditText taskEditText = new EditText(activity);
+        String archName = determineTermuxArchName();
+        taskEditText.setHint(defaultBootstrapURL);
+        taskEditText.setText(defaultBootstrapURL);
+
+        AlertDialog dialog = new AlertDialog.Builder(activity)
+            .setTitle("Bootstrap zipball location")
+            .setMessage("Enter the URL of a directory containing bootstrap-" + archName + ".zip")
+            .setView(taskEditText)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String bootstrapURL = String.valueOf(taskEditText.getText());
+                    restOfSetupIfNeeded(activity, whenDone, bootstrapURL);
+                }
+            })
+            .create();
+
+        dialog.show();
+    }
+
+    static void restOfSetupIfNeeded(final Activity activity, final Runnable whenDone, String bootstrapURL) {
+
         final ProgressDialog progress = ProgressDialog.show(activity, null, activity.getString(R.string.bootstrap_installer_body), true, false);
         new Thread() {
             @Override
@@ -156,8 +184,8 @@ final class TermuxInstaller {
                     final byte[] buffer = new byte[8096];
                     final List<Pair<String, String>> symlinks = new ArrayList<>(50);
 
-                    final byte[] zipBytes = loadZipBytes();
-                    try (ZipInputStream zipInput = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+                    final URL zipUrl = determineZipUrl(bootstrapURL);
+                    try (ZipInputStream zipInput = new ZipInputStream(zipUrl.openStream())) {
                         ZipEntry zipEntry;
                         while ((zipEntry = zipInput.getNextEntry()) != null) {
                             if (zipEntry.getName().equals("SYMLINKS.txt")) {
@@ -375,12 +403,30 @@ final class TermuxInstaller {
         return FileUtils.createDirectoryFile(directory.getAbsolutePath());
     }
 
-    public static byte[] loadZipBytes() {
-        // Only load the shared library when necessary to save memory usage.
-        System.loadLibrary("termux-bootstrap");
-        return getZip();
+    /** Get bootstrap zip url for this systems cpu architecture. */
+    private static URL determineZipUrl(String bootstrapURL) throws MalformedURLException {
+        String archName = determineTermuxArchName();
+        return new URL(bootstrapURL + "/bootstrap-" + archName + ".zip");
     }
 
-    public static native byte[] getZip();
+    private static String determineTermuxArchName() {
+        // Note that we cannot use System.getProperty("os.arch") since that may give e.g. "aarch64"
+        // while a 64-bit runtime may not be installed (like on the Samsung Galaxy S5 Neo).
+        // Instead we search through the supported abi:s on the device, see:
+        // http://developer.android.com/ndk/guides/abis.html
+        // Note that we search for abi:s in preferred order (the ordering of the
+        // Build.SUPPORTED_ABIS list) to avoid e.g. installing arm on an x86 system where arm
+        // emulation is available.
+        for (String androidArch : Build.SUPPORTED_ABIS) {
+            switch (androidArch) {
+                case "arm64-v8a": return "aarch64";
+                case "armeabi-v7a": return "arm";
+                case "x86_64": return "x86_64";
+                case "x86": return "i686";
+            }
+        }
+        throw new RuntimeException("Unable to determine arch from Build.SUPPORTED_ABIS =  " +
+            Arrays.toString(Build.SUPPORTED_ABIS));
+    }
 
 }
