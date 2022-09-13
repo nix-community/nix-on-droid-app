@@ -183,6 +183,7 @@ final class TermuxInstaller {
 
                     final byte[] buffer = new byte[8096];
                     final List<Pair<String, String>> symlinks = new ArrayList<>(50);
+                    final List<String> executables = new ArrayList<>(128);
 
                     final URL zipUrl = determineZipUrl(bootstrapURL);
                     try (ZipInputStream zipInput = new ZipInputStream(zipUrl.openStream())) {
@@ -204,6 +205,12 @@ final class TermuxInstaller {
                                         showBootstrapErrorDialog(activity, whenDone, Error.getErrorMarkdownString(error));
                                         return;
                                     }
+                                }
+                            } else if (zipEntry.getName().equals("EXECUTABLES.txt")) {
+                                BufferedReader executablesReader = new BufferedReader(new InputStreamReader(zipInput));
+                                String line;
+                                while ((line = executablesReader.readLine()) != null) {
+                                    executables.add(line);
                                 }
                             } else {
                                 String zipEntryName = zipEntry.getName();
@@ -230,6 +237,19 @@ final class TermuxInstaller {
                                 }
                             }
                         }
+                    }
+
+                    if (!executables.isEmpty()) {
+                        for (String executable : executables) {
+                            //noinspection OctalInteger
+                            try {
+                                Os.chmod(TERMUX_STAGING_PREFIX_DIR + "/" + executable, 0700);
+                            } catch (Throwable t) {
+                                Logger.logError(LOG_TAG, "EXECUTABLES error: " + TERMUX_STAGING_PREFIX_DIR + "/" + executable + t);
+                            }
+                        }
+                    } else {
+                        throw new RuntimeException("Installer: no EXECUTABLES.txt found while extracting environment archive.");
                     }
 
                     if (symlinks.isEmpty())
