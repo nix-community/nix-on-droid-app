@@ -58,6 +58,7 @@ android {
         manifestPlaceholders.TERMUX_TASKER_APP_NAME = "Termux:Tasker"
         manifestPlaceholders.TERMUX_WIDGET_APP_NAME = "Termux:Widget"
 
+        /* NIX-ON-DROID: Unused
         externalNativeBuild {
             ndkBuild {
                 cFlags "-std=c11", "-Wall", "-Wextra", "-Werror", "-Os", "-fno-stack-protector", "-Wl,--gc-sections"
@@ -73,6 +74,7 @@ android {
                 universalApk true
             }
         }
+        */
     }
 
     signingConfigs {
@@ -104,11 +106,13 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    /* NIX-ON-DROID: Unused
     externalNativeBuild {
         ndkBuild {
             path "src/main/cpp/Android.mk"
         }
     }
+    */
 
     lintOptions {
         disable 'ProtectedPermissions'
@@ -210,6 +214,7 @@ clean {
     }
 }
 
+/* NIX-ON-DROID: Unused
 task downloadBootstraps() {
     doLast {
         def packageVariant = project.ext.packageVariant
@@ -236,3 +241,4 @@ afterEvaluate {
         variant.javaCompileProvider.get().dependsOn(downloadBootstraps)
     }
 }
+*/
