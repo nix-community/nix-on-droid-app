@@ -49,8 +49,8 @@ android {
 
         buildConfigField "String", "TERMUX_PACKAGE_VARIANT", "\"" + project.ext.packageVariant + "\"" // Used by TermuxApplication class
 
-        manifestPlaceholders.TERMUX_PACKAGE_NAME = "com.termux"
-        manifestPlaceholders.TERMUX_APP_NAME = "Termux"
+        manifestPlaceholders.TERMUX_PACKAGE_NAME = "com.termux.nix"
+        manifestPlaceholders.TERMUX_APP_NAME = "Nix"
         manifestPlaceholders.TERMUX_API_APP_NAME = "Termux:API"
         manifestPlaceholders.TERMUX_BOOT_APP_NAME = "Termux:Boot"
         manifestPlaceholders.TERMUX_FLOAT_APP_NAME = "Termux:Float"
@@ -75,6 +75,18 @@ android {
             }
         }
         */
+    }
+
+    // NIX-ON-DROID: Downstream version
+    defaultConfig {
+        def nixOnDroidMajor = 0
+        def nixOnDroidMinor = 3
+        def nixOnDroidRev = 0
+
+        applicationIdSuffix ".nix"
+        versionNameSuffix "_v${nixOnDroidMajor}.${nixOnDroidMinor}.${nixOnDroidRev}_nix"
+        versionCode android.defaultConfig.versionCode * 1000 + \
+            nixOnDroidMajor * 100 + nixOnDroidMinor * 10 + nixOnDroidRev
     }
 
     signingConfigs {
