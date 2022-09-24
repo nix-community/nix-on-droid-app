@@ -39,7 +39,6 @@ android {
 
     defaultConfig {
         applicationId "com.termux"
-        applicationIdSuffix ".nix"
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
         versionCode 118
@@ -76,6 +75,18 @@ android {
             }
         }
         */
+    }
+
+    // NIX-ON-DROID: Downstream version
+    defaultConfig {
+        def nixOnDroidMajor = 0
+        def nixOnDroidMinor = 3
+        def nixOnDroidRev = 0
+
+        applicationIdSuffix ".nix"
+        versionNameSuffix "_v${nixOnDroidMajor}.${nixOnDroidMinor}.${nixOnDroidRev}_nix"
+        versionCode android.defaultConfig.versionCode * 1000 + \
+            nixOnDroidMajor * 100 + nixOnDroidMinor * 10 + nixOnDroidRev
     }
 
     signingConfigs {
