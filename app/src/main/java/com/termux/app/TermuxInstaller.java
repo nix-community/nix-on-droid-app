@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.system.Os;
 import android.util.Pair;
 import android.view.WindowManager;
@@ -27,7 +26,6 @@ import com.termux.shared.termux.TermuxUtils;
 import com.termux.shared.termux.shell.command.environment.TermuxShellEnvironment;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
@@ -424,18 +422,6 @@ final class TermuxInstaller {
     private static Error ensureDirectoryExists(File directory) {
         return FileUtils.createDirectoryFile(directory.getAbsolutePath());
     }
-
-    // NIX-ON-DROID: Unused
-    @SuppressWarnings("unused")
-    public static byte[] loadZipBytes() {
-        // Only load the shared library when necessary to save memory usage.
-        System.loadLibrary("termux-bootstrap");
-        return getZip();
-    }
-
-    // NIX-ON-DROID: Unused
-    @SuppressWarnings("unused")
-    public static native byte[] getZip();
 
     /** Get bootstrap zip url for this systems cpu architecture. */
     private static URL determineZipUrl(String bootstrapURL) throws MalformedURLException {
