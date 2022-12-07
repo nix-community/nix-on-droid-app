@@ -37,15 +37,20 @@ android {
         implementation project(":termux-shared")
     }
 
+    // NIX-ON-DROID: Downstream version.
     defaultConfig {
         applicationId "com.termux"
+        applicationIdSuffix ".nix"
+        versionCode 188031
+        versionName "0.118.0_v0.3.1_nix"
+        // fdroid checkupdates looks for literal versionCode/versionName,
+        // can't get fancy with these and use string interpolation and similar
+
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
-        versionCode 118
-        versionName "0.118.0"
 
         if (appVersionName) versionName = appVersionName
-        validateVersionName(versionName)
+        //validateVersionName(versionName)
 
         buildConfigField "String", "TERMUX_PACKAGE_VARIANT", "\"" + project.ext.packageVariant + "\"" // Used by TermuxApplication class
 
@@ -75,18 +80,6 @@ android {
             }
         }
         */
-    }
-
-    // NIX-ON-DROID: Downstream version
-    defaultConfig {
-        def nixOnDroidMajor = 0
-        def nixOnDroidMinor = 3
-        def nixOnDroidRev = 0
-
-        applicationIdSuffix ".nix"
-        versionNameSuffix "_v${nixOnDroidMajor}.${nixOnDroidMinor}.${nixOnDroidRev}_nix"
-        versionCode android.defaultConfig.versionCode * 1000 + \
-            nixOnDroidMajor * 100 + nixOnDroidMinor * 10 + nixOnDroidRev
     }
 
     signingConfigs {
