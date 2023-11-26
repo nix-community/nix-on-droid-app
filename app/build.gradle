@@ -45,6 +45,9 @@ android {
         versionName "0.118.0_v0.3.3_nix"
         // fdroid checkupdates looks for literal versionCode/versionName,
         // can't get fancy with these and use string interpolation and similar
+        ndk {
+          abiFilters 'arm64-v8a'
+        }
 
         minSdkVersion project.properties.minSdkVersion.toInteger()
         targetSdkVersion project.properties.targetSdkVersion.toInteger()
@@ -80,6 +83,13 @@ android {
             }
         }
         */
+        splits {
+            abi {
+                reset ()
+                include 'arm64-v8a'
+                universalApk false
+            }
+        }
     }
 
     signingConfigs {
