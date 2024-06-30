@@ -46,7 +46,7 @@ android {
         // fdroid checkupdates looks for literal versionCode/versionName,
         // can't get fancy with these and use string interpolation and similar
         ndk {
-          abiFilters 'arm64-v8a'
+          abiFilters 'arm64-v8a', 'x86_64'
         }
 
         minSdkVersion project.properties.minSdkVersion.toInteger()
