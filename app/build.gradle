@@ -41,8 +41,8 @@ android {
     defaultConfig {
         applicationId "com.termux"
         applicationIdSuffix ".nix"
-        versionCode 188035
-        versionName "0.118.0_v0.3.5_nix"
+        versionCode 188036
+        versionName "0.118.0_v0.3.6_nix"
         // fdroid checkupdates looks for literal versionCode/versionName,
         // can't get fancy with these and use string interpolation and similar
         ndk {
