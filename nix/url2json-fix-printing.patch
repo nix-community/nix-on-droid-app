@@ -1,0 +1,12 @@
+--- a/url2json.sh
++++ b/url2json.sh
+@@ -115,7 +115,8 @@ PKG_URL_NO_EXT="${POM_URL%.pom}"
+ # Name of package without extension.
+ PKG_NAME="$(basename "${PKG_URL_NO_EXT}")"
+ 
+-echo -en "${CLR} - Nix entry for: ${1##*/}\r" >&2
++printf -v spaces '%*s' 60 ''
++echo -en "${CLR} - Nix entry for: ${1##*/}$spaces\r" >&2
+ 
+ REPO_URL=$(match_repo_url "${PKG_URL_NO_EXT}")
+ 

@@ -37,3 +37,8 @@ local.properties
 .swp
 ehthumbs.db
 Thumbs.db
+
+# nix
+result
+result-*
+.direnv
